@@ -61,11 +61,35 @@ Albums
 //	releases (oldies, 70s, 80s, 90s, or modern)
 //Order by decade.
 
+Albums
+	.Select(a => new 
+		{
+			Title = a.Title,
+			Artist = a.Artist.Name,
+			Year = a.ReleaseYear,
+			Decade = a.ReleaseYear < 1970 ? "Oldies" :
+						a.ReleaseYear < 1980 ? "70s" :
+						a.ReleaseYear < 1990 ? "80s" :
+						a.ReleaseYear < 2000 ? "90s" : "Modern" 
+		})
+	.OrderBy(a => a.Year)
+	//.ThenBy(a => a.Decade)
 
+// < 1970
+//   oldies
+//else
+//(  < 1980
+//	70s
+//(else
+//	< 1990
+//	80s
+//(else
+//	<2000
+//	90s
+//else
+//  modern)))
 
-
-
-
+ 
 
 
 
