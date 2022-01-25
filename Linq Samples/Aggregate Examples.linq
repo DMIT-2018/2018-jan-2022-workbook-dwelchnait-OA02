@@ -53,7 +53,7 @@ Tracks.Average(t => t.Milliseconds )
 Tracks.Select(t => t.Milliseconds).Average()
 
 //List all albums of the 60s showing the album title, artist and various
-//aggregates for albums contaning tracks
+//aggregates for albums containing tracks
 
 //for each album show the number of tracks, the longest playing track,
 //the shortest playing track, the total price of all tracks and the
@@ -62,5 +62,60 @@ Tracks.Select(t => t.Milliseconds).Average()
 //Hint: Albums has two navigation properties
 //		Artist points to the single parent record
 //		Tracks points to the collection of child records (Tracks) of that album
+
+//using aggregates: I need collections for the aggregates
+// aggregates are against Tracks (collection for each album)
+// for each album report title,artist
+
+//which table to start with?: Album
+Albums
+//filter my albums for the 60s
+Albums
+	.Where(a => a.ReleaseYear > 1959 && a.ReleaseYear <1970)
+//display title and artist
+Albums
+	.Where(a => a.ReleaseYear > 1959 && a.ReleaseYear < 1970)
+	.Select(a => new
+		{
+			Title = a.Title,
+			Artist = a.Artist.Name
+		})
+//how many tracks on the album
+Albums
+	.Where(a => a.ReleaseYear > 1959 && a.ReleaseYear < 1970
+			&& a.Tracks.Count() > 0)
+	.Select(a => new
+	{
+		Title = a.Title,
+		Artist = a.Artist.Name,
+		CountOfTracks = a.Tracks.Count()
+	})
+//the longest track on the album
+Albums
+	.Where(a => a.ReleaseYear > 1959 && a.ReleaseYear < 1970
+				&& a.Tracks.Count() > 0)
+	.Select(a => new
+	{
+		Title = a.Title,
+		Artist = a.Artist.Name,
+		CountOfTracks = a.Tracks.Count(),
+		LongestTrack = a.Tracks.Max(tr => tr.Milliseconds)
+	})
+//set up the rest of the aggregates
+Albums
+	.Where(a => a.ReleaseYear > 1959 && a.ReleaseYear < 1970
+				&& a.Tracks.Count() > 0)
+	.Select(a => new
+	{
+		Title = a.Title,
+		Artist = a.Artist.Name,
+		CountOfTracks = a.Tracks.Count(),
+		LongestTrack = a.Tracks.Max(tr => tr.Milliseconds),
+		ShortestTrack = (from tr in a.Tracks
+							select tr.Milliseconds).Min(),
+	    TotalPrice = a.Tracks.Select(tr => tr.UnitPrice).Sum(),
+		AverageTrackLength = a.Tracks.Average(tr => tr.Milliseconds)
+	})
+
 
 
