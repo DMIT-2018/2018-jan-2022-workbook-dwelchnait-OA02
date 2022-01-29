@@ -2,7 +2,6 @@
   <Connection>
     <ID>ac19c5d1-a507-4043-bafb-b647e09ebfb9</ID>
     <NamingServiceVersion>2</NamingServiceVersion>
-    <Persist>true</Persist>
     <Server>.</Server>
     <AllowDateOnlyTimeOnly>true</AllowDateOnlyTimeOnly>
     <DeferDatabasePopulation>true</DeferDatabasePopulation>
@@ -81,7 +80,7 @@ void Main()
 							.OrderBy(c => c.Country)
 							.Select(c => c.Country)
 							.Distinct()
-							.Dump()
+							//.Dump()
 							;
 							
 	//.Take() and .Skip()
@@ -95,6 +94,155 @@ void Main()
 	//e) on the return statement, against your collection
 	//		you used a .Skip and .Take
 	//     return variablename.Skip(rowsSkipped).Take(pagesize).ToList();
+	
+	//Any and All
+	//There are 25 Genres on file
+	
+	//show genres that have tracks which are not on any playlist
+	Genres
+		.Where(g => g.Tracks.Any(tr => tr.PlaylistTracks.Count() == 0))
+		.Select(g => g)
+		//.Dump()
+		;
+
+	//show genres that have all tracks appearing at least once on a playlist
+	Genres
+		.Where(g => g.Tracks.All(tr => tr.PlaylistTracks.Count() > 0))
+		.Select(g => g)
+		//.Dump()
+		;
+
+	//there maybe times that using a !Any() -> All(!relationship)
+	//and a !All() -> Any(!relationship)
+	
+	//Using All and Any in comparing 2 complex collections
+	//If your collection is NOT a complex record (list of integers, or strings) there
+	//	is a Linq method called .Except that can be used to solve your query
+	
+	//https://docs.microsoft.com/en-us/dotnet/api/system.linq.enumerable.except?view=net-6.0
+	//https://dotnettutorials.net/lesson/linq-except-method/
+	
+	//Compare the track collection of 2 people using All and Any
+	//create a small anonymous collection for two person
+	// Roberto Almeida(AlmeidaR) and Michelle Brooks(BrooksM)
+	
+	var almeida = PlaylistTracks
+					.Where(x => x.Playlist.UserName.Equals("AlmeidaR"))
+					.Select(x => new
+						{
+							song = x.Track.Name,
+							genre = x.Track.Genre.Name,
+							id = x.TrackId,
+							artist = x.Track.Album.Artist.Name
+						})
+					.Distinct()
+					.OrderBy(x => x.song)
+					//.Dump() //110
+					;
+
+
+	var brooks = PlaylistTracks
+					.Where(x => x.Playlist.UserName.Equals("BrooksM"))
+					.Select(x => new
+					{
+						song = x.Track.Name,
+						genre = x.Track.Genre.Name,
+						id = x.TrackId,
+						artist = x.Track.Album.Artist.Name
+					})
+					.Distinct()
+					.OrderBy(x => x.song)
+					//.Dump() //88
+					;
+					
+	//List the tracks that BOTH Roberto and Michelle like
+	//	compare 2 collections together (ListA and ListB)
+	//	assume ListA is Roberto and ListB is Michelle
+	//	ListA is the collection you wish to report on
+	//  ListB is what you wish to compare ListA to (no reporting)
+	
+	almeida 
+		.Where (rob => brooks.Any(mic => mic.id == rob.id))
+		.OrderBy(rob => rob.song)
+		//.Dump()
+		;
+
+
+	brooks
+		.Where(mic => almeida.Any(rob => mic.id == rob.id))
+		.OrderBy(mic => mic.song)
+		//.Dump()
+		;
+
+	//What songs does Roberto like but not Michelle 
+	almeida
+		.Where(rob => !brooks.Any(mic => mic.id == rob.id))
+		.OrderBy(rob => rob.song)
+		//.Dump()
+		;
+
+	almeida
+			.Where(rob => brooks.All(mic => mic.id != rob.id))
+			.OrderBy(rob => rob.song)
+			//.Dump()
+			;
+	//What songs does Michelle like but not Roberto 
+	brooks
+		.Where(mic => !almeida.Any(rob => rob.id == mic.id))
+		.OrderBy(mic => mic.song)
+		//.Dump()
+		;
+		
+	//Unions
+	//since Linq is converted into Sql one would expect that the
+	//		Sql Union rule must be the same in Linq
+	//purpose: concatenating multiple resullts into one collection
+	//syntax (queryA).Union(queryB)[.Union(query...)]
+	//rules:
+	//	number of columns the same
+	//	column datatypes must match
+	//	ordering should be done as a method after the last Union
+	
+	//List the stats (count, cost, average track length) of Albums on Tracks
+	//NOTE: for cost and average, one will need an instance in tracks to do
+	//			the aggregation
+	
+	//concern: What is the Album does not have an recorded tracks
+	
+	//Albums with no tracks on the database will have a count, however
+	//		cost and average length will be 0 (no instances to aggregate)
+	
+	//solution: create two queries; one handling no tracks and one handling
+	//				albums with tracks then UNION the two results
+	
+	//NOTE: IF you are hard coding numeric fields, the query with the hard
+	//			coded value MUST be the first query
+	
+	//queryA would be Albums with no tracks (hard code cost and average)
+	//queryB would be Albums with tracks(cost and avaerage will be calculated)
+	
+	(Albums
+		.Where(x => x.Tracks.Count( ) == 0)
+		.Select(x => new
+				{
+					title = x.Title,
+					totalTracks = x.Tracks.Count(),
+					totalCost = 0.00m,
+					averagelength = 0.00
+				}))
+		.Union(Albums
+			.Where(x => x.Tracks.Count() > 0)
+			.Select(x => new
+			{
+				title = x.Title,
+				totalTracks = x.Tracks.Count(),
+				totalCost = x.Tracks.Sum(t => t.UnitPrice),
+				averagelength = x.Tracks.Average(t => t.Milliseconds)
+			}))
+		.OrderBy(c => c.totalTracks)
+		.Dump()
+		;
+
 }
 
 // You can define other methods, fields, classes and namespaces here
