@@ -42,7 +42,8 @@ namespace ChinookSystem.BLL
                                                     ReleaseYear = x.Album.ReleaseYear,
                                                     ReleaseLabel = x.Album.ReleaseLabel,
                                                     ArtistName = x.Album.Artist.Name
-                                                });
+                                                })
+                                                .Distinct();
             return info.ToList();
         }
         #endregion
