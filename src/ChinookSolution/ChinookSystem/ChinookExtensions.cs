@@ -43,6 +43,12 @@ namespace ChinookSystem
                 //create an instance of the service and return the instance
                 return new AlbumServices(context);
             });
+            services.AddTransient<ArtistServices>((serviceProvider) =>
+            {
+                var context = serviceProvider.GetRequiredService<ChinookContext>();
+                //create an instance of the service and return the instance
+                return new ArtistServices(context);
+            });
 
         }
     }
