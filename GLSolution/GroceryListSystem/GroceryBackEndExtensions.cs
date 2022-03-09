@@ -27,6 +27,13 @@ namespace GroceryListSystem
                 var context = serviceProvider.GetRequiredService<GroceryListContext>();
                 return new CategoryServices(context);
             });
+            services.AddTransient<ProductServices>((serviceProvider) =>
+            {
+                //retrieve the registered DbContext done in AddDbContext<>()
+                var context = serviceProvider.GetRequiredService<GroceryListContext>();
+                return new ProductServices(context);
+            });
+
         }
 
     }

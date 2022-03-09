@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GroceryListSystem.ViewModels
 {
-    public class CategoryProducts
+    public class CategoryProduct
     {
         public int ProductID { get; set; }
         public string Description { get; set; }
