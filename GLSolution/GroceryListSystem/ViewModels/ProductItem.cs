@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 
 #region Additional Namespaces
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 #endregion
 
 namespace GroceryListSystem.ViewModels
@@ -24,7 +23,6 @@ namespace GroceryListSystem.ViewModels
         public string UnitSize { get; set; }
         public int CategoryID { get; set; }
         public bool Taxable { get; set; }
-        public byte[] Photo { get; set; }
 
     }
 }

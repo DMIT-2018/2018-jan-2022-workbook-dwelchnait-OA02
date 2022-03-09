@@ -15,19 +15,19 @@ namespace GroceryListSystem
     public static class GroceryBackEndExtensions
     {
         public static void BackendDependencies(this IServiceCollection services,
-    Action<DbContextOptionsBuilder> options)
+                                Action<DbContextOptionsBuilder> options)
         {
             //register the DBContext class with the service collection
             services.AddDbContext<GroceryListContext>(options);
 
             //add any services that you create in the class library using .AddTransient<T>(....)
-            //services.AddTransient<AboutService>((serviceProvider) =>
-            //{
-            //    //retrieve the registered DbContext done in AddDbContext<>()
-            //    var context = serviceProvider.GetRequiredService<ChinookContext>();
-            //    return new AboutService(context);
-            //});
-                    }
+            services.AddTransient<CategoryServices>((serviceProvider) =>
+            {
+                //retrieve the registered DbContext done in AddDbContext<>()
+                var context = serviceProvider.GetRequiredService<GroceryListContext>();
+                return new CategoryServices(context);
+            });
+        }
 
     }
 }
