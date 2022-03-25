@@ -277,6 +277,123 @@ namespace ChinookSystem.BLL
                 _context.SaveChanges();
             }
         }
+
+        public void PlayListTrack_MoveTracks(string playlistname, string username,
+                    List<PlaylistTrackMove> trackstomove)
+        {
+            Track trackExists = null;
+            Playlist playlistExists = null;
+            PlaylistTrack playlisttrackExists = null;
+            int tracknumber = 0;
+            List<Exception> errorlist = new List<Exception>();
+
+            if (string.IsNullOrWhiteSpace(playlistname))
+            {
+                throw new ArgumentNullException("Playlist name is missing");
+            }
+            if (string.IsNullOrWhiteSpace(username))
+            {
+                throw new ArgumentNullException("User name is missing");
+            }
+            if (trackstomove.Count== 0)
+            {
+                throw new ArgumentNullException("No track list has been supplied");
+            }
+            playlistExists = _context.Playlists
+                           .Where(x => x.Name.Equals(playlistname)
+                                   && x.UserName.Equals(username))
+                           .FirstOrDefault();
+
+            if (playlistExists == null)
+            {
+                errorlist.Add(new Exception("Play list does not exist."));
+            }
+            else
+            {
+                //code to re-sequence a playlist
+                //sort the command model data list on the re-org value
+                trackstomove.Sort((x, y) => x.TrackInput.CompareTo(y.TrackInput));
+                //validation 
+                //  a) numeric and positive non-zero
+                
+                int tempNum = 0;
+                foreach(var track in trackstomove)
+                {
+                    var songname = _context.Tracks
+                                   .Where(x => x.TrackId == track.TrackId)
+                                   .Select(x => x.Name)
+                                   .SingleOrDefault();
+                    if (int.TryParse(track.TrackInput, out tempNum))
+                    {
+                        if (tempNum < 1)
+                        {
+                            
+                            errorlist.Add(new Exception($"{songname} re-sequence value needs to be greater than 0. Example 3"));
+                        }
+                    }
+                    else
+                    {
+                        errorlist.Add(new Exception($"{songname} re-sequence value needs to be a number. Example: 3"));
+                    }
+                }
+                //  b) unique new track numbers
+
+                for(int i = 0; i < trackstomove.Count - 1; i++)
+                {
+                    var songname1 = _context.Tracks
+                                   .Where(x => x.TrackId == trackstomove[i].TrackId)
+                                   .Select(x => x.Name)
+                                   .SingleOrDefault();
+                    var songname2 = _context.Tracks
+                                   .Where(x => x.TrackId == trackstomove[i + 1].TrackId)
+                                   .Select(x => x.Name)
+                                   .SingleOrDefault();
+                    if (trackstomove[i] == trackstomove[i + 1])
+                    {
+                        errorlist.Add(new Exception($"{songname1} and {songname2} have the same re-sequence number. Re-sequence number must be unique."));
+
+                    }
+                }
+                //Re-sequence track numbers
+                tracknumber = 1;
+                foreach (PlaylistTrackMove track in trackstomove)
+                {
+                    playlisttrackExists = _context.PlaylistTracks
+                               .Where(x => x.Playlist.Name.Equals(playlistname)
+                                       && x.Playlist.UserName.Equals(username)
+                                       && x.TrackId == track.TrackId)
+                               .FirstOrDefault();
+                    if (playlisttrackExists != null)
+                    {
+                        playlisttrackExists.TrackNumber = tracknumber;
+                        EntityEntry<PlaylistTrack> updating = _context.Entry(playlisttrackExists);
+                        updating.State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+                        tracknumber++;
+                    }
+                    else
+                    {
+                        var songname = _context.Tracks
+                                   .Where(x => x.TrackId == track.TrackId)
+                                   .Select(x => x.Name)
+                                   .SingleOrDefault();
+                        errorlist.Add(new Exception($"{songname} is no longer on playlist. Refresh search and repeat remove"));
+                    }
+                }
+            }
+            if (errorlist.Count > 0)
+            {
+                //throw the list of business processing error(s)
+                throw new AggregateException("Unable to move tracks. Check concerns", errorlist);
+            }
+            else
+            {
+                //consider data valid
+                //has passed business processing rules
+                _context.SaveChanges();
+            }
+        }
+
+
         #endregion
     }
 }

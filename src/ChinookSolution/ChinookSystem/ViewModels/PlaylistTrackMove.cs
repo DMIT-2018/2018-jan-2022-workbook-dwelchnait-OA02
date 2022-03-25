@@ -11,6 +11,6 @@ namespace ChinookSystem.ViewModels
         public int TrackId { get; set; }
         public bool SelectedTrack { get; set; }
         public int TrackNumber { get; set; }
-        public int TrackInput { get; set; }
+        public string TrackInput { get; set; }
     }
 }
