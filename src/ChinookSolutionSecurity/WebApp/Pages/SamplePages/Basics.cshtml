@@ -1,0 +1,39 @@
+﻿@page "{id?}"
+@model WebApp.Pages.SamplePages.BasicsModel
+@{
+    //the cshtml page contains both cs code and html code
+    //the @ symbol takes processing from the html environment
+    //  and moves it to the C# environment
+    //processing any html code moves processig into the html
+    //  environment
+
+    //set the text for the brower window tab
+    ViewData["Title"]="Review page basics";
+}
+<h1>Basics of Razor Page (Review)</h1>
+
+<h3>Demonstraton of OnGet() request processing</h3>
+
+@if (string.IsNullOrWhiteSpace(Model.MyName))
+{
+    <p>The random number is odd.</p>
+}
+else
+{
+    <p>@Model.MyName</p>
+}<!--eof-->
+
+<h3>Demonstration of OnPost request processing for a form</h3>
+
+<form method="post">
+    <label>
+        Enter a number
+        <input type="number" asp-for="id" /><br/>
+    </label>
+    <button type="submit" value="A" id="theButton" name="theButton">A Button</button>
+    &nbsp;&nbsp;
+    <button type="submit" value="B" id="theButton" name="theButton">B Button</button>
+
+</form>
+<br/>
+<p style="color:forestgreen; font-weight:bold;">@Model.FeedBack</p>
