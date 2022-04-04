@@ -348,7 +348,7 @@ namespace ChinookSystem.BLL
                                    .Where(x => x.TrackId == trackstomove[i + 1].TrackId)
                                    .Select(x => x.Name)
                                    .SingleOrDefault();
-                    if (trackstomove[i] == trackstomove[i + 1])
+                    if (trackstomove[i].TrackInput == trackstomove[i + 1].TrackInput)
                     {
                         errorlist.Add(new Exception($"{songname1} and {songname2} have the same re-sequence number. Re-sequence number must be unique."));
 

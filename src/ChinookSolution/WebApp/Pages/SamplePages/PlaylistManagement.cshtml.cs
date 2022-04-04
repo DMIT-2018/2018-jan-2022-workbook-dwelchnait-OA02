@@ -65,7 +65,13 @@ namespace WebApp.Pages.SamplePages
         //query data model for playlist track table
         public List<PlaylistTrackInfo> qplaylistInfo { get; set; }
 
-        //command data model for playlist track table
+        /// <summary>
+        /// command model collection
+        /// data will be moved automatically from the form into this collection
+        /// 
+        /// create a command data instance, will be needed to do logic of retaining
+        ///     errors on table (see form for retain code
+        /// </summary>
         [BindProperty]
         public List<PlaylistTrackMove> cplaylistInfo { get; set; }
 
@@ -220,7 +226,7 @@ namespace WebApp.Pages.SamplePages
             {
                 //Add the code to process the list of tracks via the service.
                 string username = USERNAME;
-              //  _playlisttrackServices.PlayListTrack_RemoveTracks(playlistname.Trim(),username, cplaylistInfo);
+                _playlisttrackServices.PlayListTrack_RemoveTracks(playlistname.Trim(),username, cplaylistInfo);
                 FeedBackMessage = "Tracks have been removed";
 
                 return RedirectToPage(new
@@ -261,7 +267,7 @@ namespace WebApp.Pages.SamplePages
             {
                 //Add the code to process the list of tracks via the service.
                 string username = USERNAME;
-             //   _playlisttrackServices.PlayListTrack_MoveTracks(playlistname.Trim(), username, cplaylistInfo);
+                _playlisttrackServices.PlayListTrack_MoveTracks(playlistname.Trim(), username, cplaylistInfo);
                 FeedBackMessage = "Tracks have been re-sequenced";
 
                 return RedirectToPage(new
