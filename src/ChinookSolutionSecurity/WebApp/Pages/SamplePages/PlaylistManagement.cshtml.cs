@@ -59,6 +59,7 @@ namespace WebApp.Pages.SamplePages
         public int? currentpage { get; set; }
         #endregion
 
+        #region Page variables
         [BindProperty(SupportsGet = true)]
         public string searchBy { get; set; }
 
@@ -79,19 +80,32 @@ namespace WebApp.Pages.SamplePages
 
         [BindProperty]
         public int addtrackid { get; set; }
+        #endregion
 
         #region Security
         public const string USERNAME = "HansenB";
         public ApplicationUser AppUser { get; set; }
         public string EmployeeName { get; set; }
+
+        //optionally you can use this variable in routing
+        [BindProperty(SupportsGet = true)]
+        public int? employeeid { get; set; }
         #endregion
 
         public async Task OnGet()
         {
             AppUser = await _UserManager.FindByNameAsync(User.Identity.Name);
+            employeeid = AppUser.EmployeeId.Value;
             EmployeeName = _Security.GetEmployeeName(AppUser.EmployeeId.Value);
             GetTrackInfo();
             GetPlaylist();
+        }
+
+        public async Task GetActiveEmployee()
+        {
+            AppUser = await _UserManager.FindByNameAsync(User.Identity.Name);
+            employeeid = AppUser.EmployeeId.Value;
+            EmployeeName = _Security.GetEmployeeName(AppUser.EmployeeId.Value);
         }
 
         public void GetTrackInfo()
@@ -181,6 +195,9 @@ namespace WebApp.Pages.SamplePages
 
         public IActionResult OnPostAddTrack()
         {
+            _ = GetActiveEmployee();
+            Thread.Sleep(1000);
+
             try
             {
                 if (string.IsNullOrWhiteSpace(playlistname))
@@ -199,6 +216,8 @@ namespace WebApp.Pages.SamplePages
 
                 return RedirectToPage(new
                 {
+                    // remember to place the routing parameter on your @page
+                    //employeeid = employeeid,  I woulld make the employeeid the first routing parameter
                     searchby = searchBy,
                     searcharg = searchArg,
                     playlistname = playlistname
